@@ -63,7 +63,7 @@ and you should see output:
 
 ## Sending low level control messages to motor/steering
 
-This step is useful to validate that the i2cpwm_board is properly working.
+This step is useful to validate that the i2cpwm_board is properly working.  You probably want to put your donkey car on a "rack" so that you don't end up chasing it.
 
 To set the throttle to make the wheels spin:
 
@@ -78,6 +78,8 @@ $ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
 - servo: 1
   value: 366.0"
 ```
+
+After hitting enter, the wheels on your donkey car should be spinning.
 
 To set it back to idle, redo the above command but use `333.0` as the value.
 
@@ -104,7 +106,41 @@ Now you can type `i` to accelerate and `k` to stop.
 
 ## Viewing Camera images
 
-TODO
+### Capture and publish to topic
+
+This assumes you've built the https://github.com/dganbold/raspicam_node module.  See Appendix / Build raspicam_node.
+
+```
+$ roslaunch raspicam_node camera_module_v2_640x480_5fps_autocapture.launch
+```
+
+### Display on a laptop
+
+On a linux laptop with ROS installed:
+
+```
+$ export ROS_MASTER_URI=http://ubiquityrobot.local:11311
+$ rosrun rqt_image_view rqt_image_view
+```
+
+and you should see a window popup that shows the video stream from the donkey car camera.
+
+## Wrapping up into a single launch file
+
+```
+$ cat donkey_ros.launch
+<launch>
+
+  <include file="$(find i2cpwm_board)/launch/i2cpwm_node.launch"/>
+
+  <include file="$(find raspicam_node)/launch/camera_module_v2_640x480_5fps_autocapture.launch"/>
+
+  <node pkg="donkey_llc" name="donkey_llc" type="low_level_control.py" output="screen" >
+  </node>
+
+</launch>
+$ roslaunch donkey_ros.launch
+```
 
 ## Appendix
 
@@ -136,7 +172,20 @@ TODO
   157  rosrun donkey_llc low_level_control.py
 ```
 
+### Build raspicam_node
+
+```
+  237  git clone https://github.com/dganbold/raspicam_node.git
+  238  catkin_make --pkg raspicam_node
+  239  ls
+  240  cd ..
+  241  catkin_make --pkg raspicam_node
+  242  source devel/setup.bash
+```
+
 ## References
 
 * [ROS and Raspberry Pi for Beginners | Tutorial #0 - Topics Packages RosMaster](https://www.youtube.com/watch?v=iLiI_IRedhI)
 * [Ubuiquity Robot network instructions](https://learn.ubiquityrobotics.com/connect_network)
+* [dganbold/raspicam_node](https://github.com/dganbold/raspicam_node)
+* [How to publish Image Stream in ROS Raspberry Pi](https://www.theconstructsim.com/publish-image-stream-ros-kinetic-raspberry-pi/)
