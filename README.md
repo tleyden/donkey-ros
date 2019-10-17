@@ -114,7 +114,7 @@ This assumes you've built the https://github.com/dganbold/raspicam_node module. 
 $ roslaunch raspicam_node camera_module_v2_640x480_5fps_autocapture.launch
 ```
 
-### Display on a laptop
+### Display on a laptop running ROS
 
 On a linux laptop with ROS installed:
 
@@ -124,6 +124,23 @@ $ rosrun rqt_image_view rqt_image_view
 ```
 
 and you should see a window popup that shows the video stream from the donkey car camera.
+
+### Display on a laptop via HTTP streaming
+
+On the raspberry pi do the following one-time install:
+
+```
+$ sudo apt-get install ros-kinetic-web-video-server
+```
+
+Then start the streaming server via:
+
+```
+$ rosrun web_video_server web_video_server
+```
+
+and in your browser open [http://ubiquityrobot.local:8080/stream_viewer?topic=/raspicam_node/image_raw](http://ubiquityrobot.local:8080/stream_viewer?topic=/raspicam_node/image_raw).
+
 
 ## Wrapping up into a single launch file
 
@@ -137,7 +154,10 @@ $ cat donkey_ros.launch
 
   <node pkg="donkey_llc" name="donkey_llc" type="low_level_control.py" output="screen" >
   </node>
-
+  
+  <node pkg="web_video_server" name="web_video_server" type="web_video_server">
+  </node>
+  
 </launch>
 $ roslaunch donkey_ros.launch
 ```
@@ -189,3 +209,4 @@ $ roslaunch donkey_ros.launch
 * [Ubuiquity Robot network instructions](https://learn.ubiquityrobotics.com/connect_network)
 * [dganbold/raspicam_node](https://github.com/dganbold/raspicam_node)
 * [How to publish Image Stream in ROS Raspberry Pi](https://www.theconstructsim.com/publish-image-stream-ros-kinetic-raspberry-pi/)
+* [ROS web-video-server](https://wiki.ros.org/web_video_server)
