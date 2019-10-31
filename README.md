@@ -65,6 +65,8 @@ and you should see output:
 
 This step is useful to validate that the i2cpwm_board is properly working.  You probably want to put your donkey car on a "rack" so that you don't end up chasing it.
 
+### Forward
+
 To set the throttle to make the wheels spin:
 
 ```
@@ -81,7 +83,57 @@ $ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
 
 After hitting enter, the wheels on your donkey car should be spinning.
 
+### Stop
+
 To set it back to idle, redo the above command but use `333.0` as the value.
+
+### Reverse
+
+The ESC operates just like a servo where forward/stop/reverse is mapped to right/center/left. To go into reverse, you will need to specify a value _less than_ `333.0` (i.e. stop/center).
+
+```
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 290.0"
+```
+
+The above will work as expected for some. For most people using an entry-level ESC it will not, at least not _yet_. There is a catch.
+
+To prevent drivers from accidentally reversing during a race, many ESCs require the user to "double tap" the throttle controller into reverse. The user moves the throttle stick to reverse, then back to stop/center, then again into reverse.
+
+For ROS, we accomplish the same thing like this:
+
+```sh
+# First reverse "tap"
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 320.0"
+
+# Back to stop/center
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 333.0"
+
+# Second reverse "tap"
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 320.0"
+```
+
+Now your wheels are spinning in reverse. Once in reverse driving mode, you can continue to change the throttle without going back to stop/center again:
+
+```sh
+# After the Second "tap", accelerate in reverse
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 310.0"
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 300.0"
+$ rostopic pub /servos_absolute i2cpwm_board/ServoArray "servos:
+- servo: 1
+  value: 290.0"
+```
 
 ## Driving via teleop twist
 
